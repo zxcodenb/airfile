@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 @Data
 @Component
 @ConfigurationProperties(prefix = "minio")
-public class MinioPropertie {
+public class MinioProperties {
 
     /**
      * 连接地址

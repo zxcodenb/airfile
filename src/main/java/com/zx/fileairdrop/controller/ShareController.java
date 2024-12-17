@@ -1,14 +1,17 @@
 package com.zx.fileairdrop.controller;
 
+import cn.hutool.core.lang.Assert;
+import cn.hutool.http.HttpResponse;
 import com.zx.fileairdrop.enums.UploadType;
+import com.zx.fileairdrop.res.FileInfoRes;
 import com.zx.fileairdrop.service.ShareService;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-@RestController("share")
+@RestController
+@RequestMapping("share")
 public class ShareController {
 
     @Autowired
@@ -18,11 +21,30 @@ public class ShareController {
     @PostMapping
     public String shareFile(
             @RequestParam(value = "file" , required = true) MultipartFile file,
-            @RequestParam(value = "pwd", required = true) String pwd,
-            @RequestParam(value = "expire", required = false) String expire,
+            @RequestParam(value = "pwd", required = false) String pwd,
+            @RequestParam(value = "expire", required = false) Integer expire,
             @RequestParam(value = "maxGetCount", required = true) Integer maxGetCount
     ) {
         return shareService.upload(file, pwd, expire, maxGetCount, UploadType.FILE.name());
     }
+
+
+    @GetMapping
+    public FileInfoRes getInfo(
+            @RequestParam(value = "takeCode", required = true) String takeCode,
+            @RequestParam(value = "pwd", required = false) String pwd
+    ){
+        return shareService.getInfo(takeCode, pwd, UploadType.FILE.name());
+    };
+
+
+
+
+
+
+
+
+
+
 
 }

@@ -12,6 +12,8 @@ public enum ResultCode {
     PARAM_IS_BLANK(1002, "参数为空"),
     PARAM_TYPE_BIND_ERROR(1003, "参数类型错误"),
     PARAM_NOT_COMPLETED(1004, "参数缺失"),
+    FILE_NOT_EXIST(1005, "文件不存在"),
+    PWD_ERROR(1006, "密码错误"),
     USER_NOT_HAS_AUTH(2006, "没有访问权限"),
     KNOWN_ERROR(3001, "未知异常，请联系管理员"),
     FILE_IO_ERROR(4001, "文件io异常"),

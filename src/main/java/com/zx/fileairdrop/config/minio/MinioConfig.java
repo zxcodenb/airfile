@@ -10,15 +10,15 @@ public class MinioConfig {
 
 
     @Autowired
-    private MinioPropertie minioPropertie;
+    private MinioProperties minioProperties;
 
     //单例下的 MinioClient 是线程安全的，可以多个请求使用同一个客户端来调用
     @Bean
     public MinioClient getMinioClient()
     {
         return MinioClient.builder()
-                .endpoint(minioPropertie.getEndpoint())
-                .credentials(minioPropertie.getAccessKey(), minioPropertie.getSecretKey())
+                .endpoint(minioProperties.getEndpoint())
+                .credentials(minioProperties.getAccessKey(), minioProperties.getSecretKey())
                 .build();
     }
 }

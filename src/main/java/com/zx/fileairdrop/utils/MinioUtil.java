@@ -2,9 +2,12 @@ package com.zx.fileairdrop.utils;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.UUID;
-import com.zx.fileairdrop.config.minio.MinioPropertie;
+import com.zx.fileairdrop.base.ResultCode;
+import com.zx.fileairdrop.base.exception.BusinessException;
+import com.zx.fileairdrop.config.minio.MinioProperties;
 import com.zx.fileairdrop.entity.FileUploadResult;
 import io.minio.*;
+import io.minio.errors.*;
 import io.minio.messages.Item;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +17,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 
 @Component
@@ -26,7 +31,7 @@ public class MinioUtil  {
     private MinioClient client;
 
     @Autowired
-    private MinioPropertie minioPropertie;
+    private MinioProperties minioProperties;
 
 
 
@@ -37,14 +42,20 @@ public class MinioUtil  {
      * @return true:存在, false:不存在
      * @throws Exception
      */
-    public  StatObjectResponse checkFileExist(String fileName) throws Exception {
+    public  StatObjectResponse checkFileExist(String fileName) {
 
-        return client.statObject(
-                StatObjectArgs.builder()
-                        .bucket(minioPropertie.getBucketName())
-                        .object(fileName)
-                        .build()
-        );
+        try {
+            StatObjectResponse statObjectResponse = client.statObject(
+                    StatObjectArgs.builder()
+                            .bucket(minioProperties.getBucketName())
+                            .object(fileName)
+                            .build()
+            );
+            return statObjectResponse;
+        } catch (Exception e) {
+            throw new BusinessException(ResultCode.MINIO_SERVER_ERROR.getMessage());
+        }
+
 
     }
 
@@ -55,12 +66,12 @@ public class MinioUtil  {
      */
     public FileUploadResult putFile(MultipartFile multipartFile) throws Exception {
 
-        boolean found = client.bucketExists(BucketExistsArgs.builder().bucket(minioPropertie.getBucketName()).build());
+        boolean found = client.bucketExists(BucketExistsArgs.builder().bucket(minioProperties.getBucketName()).build());
         if (!found) {
-            log.info("create bucket: [{}]", minioPropertie.getBucketName());
-            client.makeBucket(MakeBucketArgs.builder().bucket(minioPropertie.getBucketName()).build());
+            log.info("create bucket: [{}]", minioProperties.getBucketName());
+            client.makeBucket(MakeBucketArgs.builder().bucket(minioProperties.getBucketName()).build());
         } else {
-            log.info("bucket '{}' already exists.", minioPropertie.getBucketName());
+            log.info("bucket '{}' already exists.", minioProperties.getBucketName());
         }
 
         InputStream inputStream = multipartFile.getInputStream();
@@ -70,7 +81,7 @@ public class MinioUtil  {
 
         client.putObject(
                 PutObjectArgs.builder()
-                        .bucket(minioPropertie.getBucketName())
+                        .bucket(minioProperties.getBucketName())
                         .object(uploadName)
                         .contentType(multipartFile.getContentType())
                         .stream(inputStream, multipartFile.getSize(), -1)
@@ -78,7 +89,7 @@ public class MinioUtil  {
         );
 
         return FileUploadResult.builder()
-                .bucketName(minioPropertie.getBucketName())
+                .bucketName(minioProperties.getBucketName())
                 .fileName(multipartFile.getOriginalFilename())
                 .fileSize(multipartFile.getSize())
                 .uploadName(uploadName)
@@ -113,10 +124,10 @@ public class MinioUtil  {
         InputStream in=null;
         try {
             //获取文件对象
-            StatObjectResponse stat =client.statObject(StatObjectArgs.builder().bucket(minioPropertie.getBucketName()).object(fileName).build());
+            StatObjectResponse stat =client.statObject(StatObjectArgs.builder().bucket(minioProperties.getBucketName()).object(fileName).build());
             response.setContentType(stat.contentType());
             response.setHeader("Content-disposition", "attachment;filename="+new String(realName.getBytes("gb2312"), "ISO8859-1" ));
-            in =   client.getObject(GetObjectArgs.builder().bucket(minioPropertie.getBucketName()).object(fileName).build());
+            in =   client.getObject(GetObjectArgs.builder().bucket(minioProperties.getBucketName()).object(fileName).build());
             IOUtils.copy(in,response.getOutputStream());
         }finally {
             if(in!=null){

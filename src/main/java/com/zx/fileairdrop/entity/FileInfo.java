@@ -5,16 +5,18 @@ import lombok.Builder;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.io.Serializable;
 import java.util.Date;
 
 @Data
 @Builder
+@Document(collection = "file_info")
 public class FileInfo  implements Serializable {
 
     @Id
-    private Integer id;
+    private String id;
 
     private String contentType;
 
@@ -31,7 +33,7 @@ public class FileInfo  implements Serializable {
     @Indexed(background = true)
     private String takeCode;
 
-    private String expire;
+    private Integer expire;
 
     private String ip;
 
@@ -39,6 +41,10 @@ public class FileInfo  implements Serializable {
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date lastDownloadTime;
+
 
     private Boolean isDel;
 

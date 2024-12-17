@@ -1,6 +1,7 @@
 package com.zx.fileairdrop;
 
 import cn.hutool.core.util.RandomUtil;
+import com.zx.fileairdrop.entity.FileInfo;
 import com.zx.fileairdrop.entity.FileUploadResult;
 import com.zx.fileairdrop.enums.TimeUnitEnum;
 import com.zx.fileairdrop.utils.MinioUtil;
@@ -11,6 +12,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -144,15 +147,29 @@ class FileAirdropApplicationTests {
     @Test
     void tet() throws Exception{
 
-        FileUploadResult fileUploadResult = FileUploadResult.builder()
-                .fileName("test")
-                .uploadName("test")
-                .bucketName("test")
-                .build();
 
-        mongoTemplate.save(fileUploadResult);
+
+
+        Query query = new Query(Criteria.where("takeCode").is("test")); //.and("isDel").is(false));
+        final FileInfo fileInfo = mongoTemplate.findOne(query, FileInfo.class);
+        System.out.println(fileInfo);
 
     }
+
+    @Test
+    void mongodbTest(){
+        FileInfo fileInfo = FileInfo.builder()
+                .fileName("test")
+                .fileSize(100L)
+                .contentType("image/jpeg")
+                .bucketName("my-bucket")
+                .takeCode("test")
+                .build();
+        mongoTemplate.save(fileInfo);
+
+
+    }
+
 
 
 
